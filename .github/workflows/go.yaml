@@ -1,0 +1,51 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      bin_name: zotit
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install prequisites
+      run: |
+        sudo apt install zip 
+
+
+
+    - name: Build
+      run: |
+        mkdir -p dist
+
+        cp assets dist/ -r
+        cp pages dist/ -r
+
+        cp app.js dist/ 
+        cp app.css dist/ 
+        cp config.js dist/ 
+        cp mithril.js dist/ 
+        cp index.html dist/ 
+        cp manifest.json dist/ 
+    
+    - name: Zip dist
+      run: zip -r dist.zip dist
+
+    - name: release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: ${{ github.token }}
+        automatic_release_tag: ${{ github.ref }}
+        prerelease: false
+        title: ${{ github.event.head_commit.message }}
+        files: |
+          ./dist.zip
