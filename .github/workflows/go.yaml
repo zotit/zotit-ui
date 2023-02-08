@@ -62,5 +62,5 @@ jobs:
         prerelease: false
         title: ${{ github.event.head_commit.message }}
         files: |
-          ./distv2.zip
-          ./distv3.zip
+          ./distv2/distv2.zip
+          ./distv3/distv3.zip
