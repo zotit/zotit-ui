@@ -21,24 +21,38 @@ jobs:
       run: |
         sudo apt install zip 
 
-
-
-    - name: Build
+    - name: Build V2
       run: |
-        mkdir -p dist
-
-        cp assets dist/ -r
-        cp pages dist/ -r
-
-        cp app.js dist/ 
-        cp app.css dist/ 
-        cp config.js dist/ 
-        cp mithril.js dist/ 
-        cp index.html dist/ 
-        cp manifest.json dist/ 
+        mkdir -p distv2/assets/ionicons
+        cp -r assets/ionicons distv2/assets/
+        cp -r pages distv2/pages
+        cp app.js distv2/ 
+        cp app.css distv2/ 
+        cp config.js distv2/ 
+        cp mithril.js distv2/ 
+        cp index.html distv2/ 
+        cp manifest2.json distv2/ 
+        mv distv2/manifest2.json distv2/manifest.json
     
-    - name: Zip dist
-      run: zip -r dist.zip dist
+    - name: Zip distv2
+      run: cd distv2 && zip -r distv2.zip .
+    
+    - name: Build V3
+      run: |
+        mkdir -p distv3
+        cp -r assets distv3/assets/
+        cp -r pages distv3/pages
+        cp app.js distv3/ 
+        cp app.css distv3/ 
+        cp config.js distv3/ 
+        cp mithril.js distv3/ 
+        cp index.html distv3/ 
+        cp manifest3.json distv3/ 
+        mv distv3/manifest3.json distv3/manifest.json
+
+    - name: Zip distv3
+      run: cd distv3 && zip -r distv3.zip .
+    
 
     - name: release
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -48,4 +62,5 @@ jobs:
         prerelease: false
         title: ${{ github.event.head_commit.message }}
         files: |
-          ./dist.zip
+          ./distv2.zip
+          ./distv3.zip
