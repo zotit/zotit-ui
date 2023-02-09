@@ -24,7 +24,7 @@ jobs:
     - name: Build V2
       run: |
         mkdir -p distv2/assets/ionicons
-        cp -r assets/ionicons distv2/assets/
+        cp -r assets distv2/assets/
         cp -r pages distv2/pages
         cp app.js distv2/ 
         cp app.css distv2/ 
