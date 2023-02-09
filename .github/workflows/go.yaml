@@ -24,8 +24,8 @@ jobs:
     - name: Build V2
       run: |
         mkdir -p distv2/assets/ionicons
-        cp -r assets distv2/assets/
-        cp -r pages distv2/pages
+        cp -r assets distv2/
+        cp -r pages distv2/
         cp app.js distv2/ 
         cp app.css distv2/ 
         cp config.js distv2/ 
@@ -40,8 +40,8 @@ jobs:
     - name: Build V3
       run: |
         mkdir -p distv3
-        cp -r assets distv3/assets/
-        cp -r pages distv3/pages
+        cp -r assets distv3/
+        cp -r pages distv3/
         cp app.js distv3/ 
         cp app.css distv3/ 
         cp config.js distv3/ 
