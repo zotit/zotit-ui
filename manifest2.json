@@ -3,7 +3,13 @@
   "version": "0.0.2",
   "description": "Synched clipboard across browsers",
   "browser_action": {
-    "default_icon": "assets/zotit.png",
+    "default_icon": {
+      "16": "assets/zotit16.png",
+      "24": "assets/zotit24.png",
+      "32": "assets/zotit32.png",
+      "48": "assets/zotit48.png",
+      "128": "assets/zotit128.png"
+    },
     "default_title": "ZotIt",
     "default_popup": "index.html"
   },
