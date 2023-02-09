@@ -18,22 +18,23 @@ const password = {
     error: ''
 }
 
+
 function login() {
-    if(!(!username.error && !password.error)){
+    if (!(!username.error && !password.error)) {
         return;
     }
     m.request({
-            method: 'POST',
-            url: API_URL+'/login',
-            body:{
-                username:username.value,
-                password:password.value
-            }
-        })
+        method: 'POST',
+        url: API_URL + '/login',
+        body: {
+            username: username.value,
+            password: password.value
+        }
+    })
         .then(function (result) {
             Login.apiError = false;
-            if(result.token && result.token!= ""){
-                localStorage.setItem("token",result.token)
+            if (result.token && result.token != "") {
+                localStorage.setItem("token", result.token)
                 m.route.set("/home")
             }
         })
@@ -42,21 +43,30 @@ function login() {
         });
 }
 function signup() {
-    if(!(!username.error && !password.error)){
+    if (!(!username.error && !password.error)) {
+        return;
+    }
+
+    if(!Login.isChecked){
+        Login.apiError = "Please check the box to signup."
+        return;
+    }
+    if(!username.value || !password.value){
+        Login.apiError = "Please enter username and password to signup."
         return;
     }
     m.request({
-            method: 'POST',
-            url: API_URL+'/register',
-            body:{
-                username:username.value,
-                password:password.value
-            }
-        })
+        method: 'POST',
+        url: API_URL + '/register',
+        body: {
+            username: username.value,
+            password: password.value
+        }
+    })
         .then(function (result) {
             Login.apiError = false;
-            if(result.token && result.token!= ""){
-                localStorage.setItem("token",result.token)
+            if (result.token && result.token != "") {
+                localStorage.setItem("token", result.token)
                 m.route.set("/home")
             }
         })
@@ -79,15 +89,16 @@ const input = (attrs) =>
         }),
         attrs.error && m('span.error', attrs.error)
     )
-    const validate = () => {
-        username.error = username.value.length < 4
-          && 'Please enter a username longer than 4 characters'
-      
-        password.error = password.value.length < 4
-          && 'Please enter a password longer than 4 characters'
-      }
+const validate = () => {
+    username.error = username.value.length < 4
+        && 'Please enter a username longer than 4 characters'
+
+    password.error = password.value.length < 4
+        && 'Please enter a password longer than 4 characters'
+}
 const Login = {
-    apiError:"",
+    apiError: "",
+    isChecked: false,
     view: function () {
         return m("div", { class: "form-signin" }, [
             m('header.header', [
@@ -101,11 +112,21 @@ const Login = {
 
             input(username),
             input(password),
-            Login.apiError && m('p.error',Login.apiError),
+            m('div.check', [
+                m('input', { type: "checkbox",onchange:function(){
+                    Login.isChecked = !Login.isChecked
+                }},),
+                m("label", { class: "sr-only" }, ["Please check this box to accept out ",
+                    m('a', {
+                        href: "http://zotit.twobits.in/privacy-policy.html"
+                    }, "Privacy Policy"),
+                ]),
+            ]),
+            Login.apiError && m('p.error', Login.apiError),
             m("button.btn.fr", {
                 type: "button", onclick: function () {
                     login();
-                  
+
                 }
             }, "Sign in"),
             m("button.btn", {
