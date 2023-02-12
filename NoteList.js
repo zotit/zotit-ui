@@ -1,4 +1,5 @@
 import { API_URL, DB } from '../config.js';
+import { NoteModel } from '../models/NoteModel.js';
 
 async function getRemoteList() {
   let apiResult = [];
@@ -17,7 +18,7 @@ async function getRemoteList() {
         return {
           id: r.id,
           text: r.text,
-          created_at: new Date(r.CreatedAt).toISOString()
+          updated_at: new Date(r.UpdatedAt).toISOString()
         };
       })
     );
@@ -45,10 +46,10 @@ var Note = {
       await getRemoteList();
     }
     try {
-      let notes = await DB.notes.orderBy('created_at').reverse().toArray();
+      let notes = await DB.notes.orderBy('updated_at').reverse().toArray();
       Note.list = notes;
       m.redraw();
-    } catch (error) { }
+    } catch (error) {}
   },
   add: function (note) {
     let that = this;
@@ -65,7 +66,7 @@ var Note = {
         await DB.notes.add({
           id: result.id,
           text: result.text,
-          created_at: new Date(result.CreatedAt).toISOString()
+          updated_at: new Date(result.UpdatedAt).toISOString()
         });
         that.list.unshift(result);
       })
@@ -95,13 +96,10 @@ var Note = {
         await DB.notes.put({
           id: result.id,
           text: result.text,
-          created_at: new Date(result.CreatedAt).toISOString()
+          updated_at: new Date(result.UpdatedAt).toISOString()
         });
-        that.list[i] = {
-          id: result.id,
-          text: result.text,
-          created_at: new Date(result.CreatedAt).toISOString()
-        }
+        that.list.splice(i, 1);
+        that.list.unshift(result);
       })
       .catch(function (e) {
         if (e.code == 401) {

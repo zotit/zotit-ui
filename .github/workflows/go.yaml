@@ -23,13 +23,12 @@ jobs:
 
     - name: Build V2
       run: |
-        mkdir -p distv2/assets/ionicons
+        mkdir -p distv2
         cp -r assets distv2/
         cp -r pages distv2/
         cp app.js distv2/ 
         cp app.css distv2/ 
         cp config.js distv2/ 
-        cp mithril.js distv2/ 
         cp index.html distv2/ 
         cp manifest2.json distv2/ 
         mv distv2/manifest2.json distv2/manifest.json
@@ -45,7 +44,6 @@ jobs:
         cp app.js distv3/ 
         cp app.css distv3/ 
         cp config.js distv3/ 
-        cp mithril.js distv3/ 
         cp index.html distv3/ 
         cp manifest3.json distv3/ 
         mv distv3/manifest3.json distv3/manifest.json
