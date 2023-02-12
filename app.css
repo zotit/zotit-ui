@@ -416,3 +416,14 @@ html .clear-btn:active {
 .ml1{
 margin-left: 1em;
 }
+.rotate::before{
+  animation: rotation 0.5s infinite linear;
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}

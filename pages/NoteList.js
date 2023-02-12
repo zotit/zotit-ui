@@ -35,8 +35,12 @@ async function getRemoteList() {
 }
 
 var Note = {
+  isLoading: false,
   list: [],
   loadList: async function (getRemote) {
+    let that = this;
+    that.isLoading = true;
+    m.redraw();
     if (getRemote) {
       await getRemoteList();
     } else if (+new Date() - localStorage.getItem('lastSync') > 360000 * 24) {
@@ -44,14 +48,18 @@ var Note = {
       //sync if data older than 1 minute
       await getRemoteList();
     }
+    that.isLoading = false;
     try {
       let notes = await DB.notes.orderBy('created_at').reverse().toArray();
       Note.list = notes;
       m.redraw();
-    } catch (error) { }
+    } catch (error) {
+
+    }
   },
   add: function (note) {
     let that = this;
+    that.isLoading = true;
     return m
       .request({
         method: 'POST',
@@ -67,6 +75,7 @@ var Note = {
           text: result.text,
           created_at: new Date(result.CreatedAt).toISOString()
         });
+        that.isLoading = false;
         that.list.unshift(result);
       })
       .catch(function (e) {
@@ -74,11 +83,13 @@ var Note = {
           localStorage.clear();
           m.route.set('/login');
         }
+        that.isLoading = false;
         NoteList.error = 'Failed to create note.';
       });
   },
   udpate: function (note, i) {
     let that = this;
+    that.isLoading = true;
     return m
       .request({
         method: 'PUT',
@@ -97,6 +108,7 @@ var Note = {
           text: result.text,
           created_at: new Date(result.CreatedAt).toISOString()
         });
+        that.isLoading = false;
         that.list[i] = {
           id: result.id,
           text: result.text,
@@ -108,11 +120,13 @@ var Note = {
           localStorage.clear();
           m.route.set('/login');
         }
+        that.isLoading = false;
         NoteList.error = 'Failed to update this note';
       });
   },
   delete: function (i) {
     let that = this;
+    that.isLoading = true;
     return m
       .request({
         method: 'DELETE',
@@ -125,6 +139,7 @@ var Note = {
         }
       })
       .then(async function (result) {
+        that.isLoading = false;
         await DB.notes.delete(Note.list[i].id);
         that.list.splice(i, 1);
       })
@@ -133,6 +148,7 @@ var Note = {
           localStorage.clear();
           m.route.set('/login');
         }
+        that.isLoading = false;
         NoteList.error = 'Failed to delete this note';
       });
   }
@@ -277,7 +293,9 @@ const NoteList = {
               Note.loadList(true);
             }
           },
-          m('i.ion-refresh')
+          m('i.ion-refresh', {
+            class: Note.isLoading ? "rotate" : ""
+          })
         ),
         m(
           'button.clear-btn',
