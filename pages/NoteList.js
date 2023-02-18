@@ -34,9 +34,33 @@ async function getRemoteList() {
   return apiResult;
 }
 
+async function getShareCode() {
+  let apiResult = "";
+  try {
+    apiResult = await m.request({
+      method: 'GET',
+      url: API_URL + '/share-key',
+      responseType: "string",
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('token')
+      }
+    });
+
+  } catch (error) {
+    if (error.code && error.code == 401) {
+      localStorage.clear();
+      m.route.set('/login');
+    }
+    console.log(error);
+    NoteList.error = 'Failed to load share key';
+  }
+  return apiResult;
+}
 var Note = {
   isLoading: false,
+  shareCode: "",
   list: [],
+
   loadList: async function (getRemote) {
     let that = this;
     that.isLoading = true;
@@ -124,6 +148,33 @@ var Note = {
         NoteList.error = 'Failed to update this note';
       });
   },
+  share: function (shareCode, i) {
+    console.log(shareCode)
+    let that = this;
+    that.isLoading = true;
+    return m
+      .request({
+        method: 'POST',
+        url: API_URL + '/share-note',
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
+        responseType: "string",
+        body: shareCode
+      })
+      .then(async function (result) {
+        that.isLoading = false;
+        NoteList.shareView = null;
+      })
+      .catch(function (e) {
+        if (e.code == 401) {
+          localStorage.clear();
+          m.route.set('/login');
+        }
+        that.isLoading = false;
+        NoteList.error = e.message;
+      });
+  },
   delete: function (i) {
     let that = this;
     that.isLoading = true;
@@ -157,8 +208,11 @@ var Note = {
 const NoteList = {
   oninit: function () {
     Note.loadList();
+    NoteList.username = localStorage.getItem('username')
   },
+  username: "",
   editing: null,
+  shareView: null,
   error: '',
   add: function (e) {
     if (e.keyCode === 13 && e.target.value && !e.shiftKey) {
@@ -168,11 +222,24 @@ const NoteList = {
       e.target.value = '';
     }
   },
+  loadShareCode: async function () {
+    Note.isLoading = true;
+    let shareCode = await getShareCode()
+    Note.shareCode = shareCode;
+    console.log(shareCode)
+    m.redraw()
+    Note.isLoading = false;
+  },
   update: function (title) {
     if (NoteList.editing != null) {
       NoteList.editing.text = title.trim();
       if (NoteList.editing.text === '') NoteList.destroy(NoteList.editing);
       NoteList.editing = null;
+    }
+  },
+  showShare: function (note) {
+    NoteList.shareView = {
+      note_id: note.id,
     }
   },
   edit: function (note) {
@@ -203,8 +270,9 @@ const NoteList = {
     var ui = vnode.state;
     return [
       m('header.header', [
-        m('h1', 'ZotIt'),
-
+        m('h1', ['ZotIt',
+          m('span.welcome-text', "Hi " + ui.username)
+        ]),
         m(
           "textarea#new-todo[placeholder='What needs to be copied?'][autofocus]",
           {
@@ -223,7 +291,7 @@ const NoteList = {
               return m(
                 'li.note-list-item',
                 {
-                  class: note === NoteList.editing ? 'editing' : ''
+                  class: note === NoteList.editing ? 'editing' : NoteList.shareView && NoteList.shareView.note_id == note.id ? 'share-view' : ''
                 },
                 [
                   [
@@ -245,13 +313,33 @@ const NoteList = {
                       m(
                         'button.share',
                         {
-                          onclick: function () {
-                            // state.dispatch('share', [todo]);
+                          onclick: function (params) {
+                            NoteList.showShare(note)
                           }
                         },
                         m('i.ion-share')
                       )
                     ]),
+                    m('input.share-key-input', {
+
+                      placeholder: 'Enter share code.',
+                      onchange: function (e) {
+                        e.preventDefault();
+                        ui.shareView.share_key = e.currentTarget.value;
+                      },
+
+                    }),
+                    m('i.ion-checkmark.save-icon', {
+                      onclick: function (e) {
+                        console.log(ui.shareView)
+                        Note.share(ui.shareView)
+                      }
+                    }),
+                    m('i.ion-close.save-icon', {
+                      onclick: function (e) {
+                        NoteList.shareView = null
+                      }
+                    }),
                     m('textarea.edit', {
                       onupdate: function (vnode) {
                         ui.focus(vnode, note);
@@ -283,8 +371,17 @@ const NoteList = {
       ),
       m('footer#footer', [
         m('span#todo-count', [
-          m('strong', Note.list.length),
-          Note.list.length === 1 ? ' item left' : ' items left'
+          m('span.share-code', Note.shareCode),
+          m(
+            'button.share-code-btn',
+            {
+              onclick: function () {
+                ui.loadShareCode()
+              }
+            },
+            'Share Code: '
+          ),
+
         ]),
         m(
           'button.refresh',

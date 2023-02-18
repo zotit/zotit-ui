@@ -34,6 +34,7 @@ function login() {
         .then(function (result) {
             Login.apiError = false;
             if (result.token && result.token != "") {
+                localStorage.setItem("username", username.value)
                 localStorage.setItem("token", result.token)
                 m.route.set("/home")
             }
@@ -66,6 +67,7 @@ function signup() {
         .then(function (result) {
             Login.apiError = false;
             if (result.token && result.token != "") {
+                localStorage.setItem("username", username.value)
                 localStorage.setItem("token", result.token)
                 m.route.set("/home")
             }
