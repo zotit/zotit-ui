@@ -28,7 +28,6 @@ async function getRemoteList() {
       localStorage.clear();
       m.route.set('/login');
     }
-    console.log(error);
     NoteList.error = 'Failed to load notes';
   }
   return apiResult;
@@ -226,7 +225,6 @@ const NoteList = {
     Note.isLoading = true;
     let shareCode = await getShareCode()
     Note.shareCode = shareCode;
-    console.log(shareCode)
     m.redraw()
     Note.isLoading = false;
   },
@@ -331,7 +329,6 @@ const NoteList = {
                     }),
                     m('i.ion-checkmark.save-icon', {
                       onclick: function (e) {
-                        console.log(ui.shareView)
                         Note.share(ui.shareView)
                       }
                     }),
