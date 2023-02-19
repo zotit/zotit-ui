@@ -92,7 +92,7 @@ input[type='checkbox'] {
 #todoapp .welcome-text {
   font-size: 14px;
   position: absolute;
-  right: 0;
+  right: 30px;
   color: gray;
 }
 
@@ -156,8 +156,8 @@ input[type='checkbox'] {
 
 #todo-list li.share-view .share-key-input {
   display: block;
-  padding: 13px 17px 12px 17px;
-  width:80%;
+  margin: 13px 17px 12px 17px;
+  width:79%;
 }
 .share-key-input{
   font-size: 24px;
@@ -191,16 +191,15 @@ input[type='checkbox'] {
 }
 #todo-list li.share-view .save-icon{
   display: inline;
-  padding: 0 5px;
   position: absolute;
   right: 10%;
-  top: 0px;
+  top: 10px;
   cursor: pointer;
   color: green;
 }
 
 #todo-list li.share-view  i.ion-close.save-icon{
-  top: 30px;
+  right: 5px;
   color:red
 }
 

@@ -2,6 +2,7 @@ import { API_URL, DB } from '../config.js';
 
 async function getRemoteList() {
   let apiResult = [];
+  NoteList.error = "";
   try {
     apiResult = await m.request({
       method: 'GET',
@@ -35,6 +36,7 @@ async function getRemoteList() {
 
 async function getShareCode() {
   let apiResult = "";
+  NoteList.error = "";
   try {
     apiResult = await m.request({
       method: 'GET',
@@ -147,9 +149,12 @@ var Note = {
         NoteList.error = 'Failed to update this note';
       });
   },
-  share: function (shareCode, i) {
-    console.log(shareCode)
+  share: function (shareCode) {
     let that = this;
+    if(!shareCode.share_key){
+      NoteList.error = "please enter share code."
+      return;
+    }
     that.isLoading = true;
     return m
       .request({
@@ -321,7 +326,9 @@ const NoteList = {
                     m('input.share-key-input', {
 
                       placeholder: 'Enter share code.',
-                      onchange: function (e) {
+                      maxlength: "6",
+                      value: ui.shareView != null ? ui.shareView.share_key : "",
+                      oninput: function (e) {
                         e.preventDefault();
                         ui.shareView.share_key = e.currentTarget.value;
                       },
@@ -330,11 +337,13 @@ const NoteList = {
                     m('i.ion-checkmark.save-icon', {
                       onclick: function (e) {
                         Note.share(ui.shareView)
+
                       }
                     }),
                     m('i.ion-close.save-icon', {
                       onclick: function (e) {
                         NoteList.shareView = null
+                        NoteList.error = ""
                       }
                     }),
                     m('textarea.edit', {
@@ -397,6 +406,7 @@ const NoteList = {
             onclick: function () {
               localStorage.clear();
               m.route.set('/login');
+              DB.notes.clear();
             }
           },
           'Logout'
