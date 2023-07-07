@@ -51,12 +51,17 @@ jobs:
     - name: Zip distv3
       run: cd distv3 && zip -r distv3.zip .
     
+    - name: Declare some variables
+      id: short_hash
+      shell: bash
+      run: |
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
     - name: release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: ${{ github.token }}
-        automatic_release_tag: ${{ github.ref }}
+        automatic_release_tag: ${{ steps.short_hash.outputs.sha_short }}
         prerelease: false
         title: ${{ github.event.head_commit.message }}
         files: |
