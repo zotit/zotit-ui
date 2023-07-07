@@ -1,34 +1,55 @@
 import { API_URL, DB } from '../config.js';
 
-async function getRemoteList() {
+async function getRemoteList(pageNo) {
   let apiResult = [];
   NoteList.error = "";
   try {
     apiResult = await m.request({
       method: 'GET',
-      url: API_URL + '/notes',
+      url: API_URL + '/notes?page=' + pageNo,
       headers: {
         Authorization: 'Bearer ' + localStorage.getItem('token')
       }
     });
+    if (apiResult.length > 0) {
+      localStorage.setItem('lastPage', 'false')
+    } else {
+      localStorage.setItem('lastPage', 'true')
+    }
     await DB.open();
-    await DB.notes.clear();
-    await DB.notes.bulkPut(
-      apiResult.map((r) => {
-        return {
-          id: r.id,
-          text: r.text,
-          created_at: new Date(r.CreatedAt).toISOString()
-        };
-      })
-    );
-    Note.list = apiResult;
-    localStorage.setItem('lastSync', +new Date());
+    if (pageNo == 0) {
+      await DB.notes.clear();
+      await DB.notes.bulkPut(
+        apiResult.map((r) => {
+          return {
+            id: r.id,
+            text: r.text,
+            created_at: new Date(r.CreatedAt).toISOString()
+          };
+        })
+      );
+      Note.list = apiResult;
+      localStorage.setItem('lastSync', +new Date());
+    } else {
+      await DB.notes.bulkAdd(
+        apiResult.map((r) => {
+          return {
+            id: r.id,
+            text: r.text,
+            created_at: new Date(r.CreatedAt).toISOString()
+          };
+        })
+      );
+      Note.list.push(...apiResult);
+      localStorage.setItem('lastSync', +new Date());
+    }
+
   } catch (error) {
     if (error.code && error.code == 401) {
       localStorage.clear();
       m.route.set('/login');
     }
+    console.log(error)
     NoteList.error = 'Failed to load notes';
   }
   return apiResult;
@@ -61,25 +82,25 @@ var Note = {
   isLoading: false,
   shareCode: "",
   list: [],
-
-  loadList: async function (getRemote) {
+  loadList: async function (getRemote, page) {
     let that = this;
     that.isLoading = true;
     m.redraw();
     if (getRemote) {
-      await getRemoteList();
+      await getRemoteList(page);
     } else if (+new Date() - localStorage.getItem('lastSync') > 360000 * 24) {
       //360000 * 24
       //sync if data older than 1 minute
-      await getRemoteList();
+      await getRemoteList(page);
     }
     that.isLoading = false;
     try {
       let notes = await DB.notes.orderBy('created_at').reverse().toArray();
       Note.list = notes;
       m.redraw();
+      return notes;
     } catch (error) {
-
+      return [];
     }
   },
   add: function (note) {
@@ -151,7 +172,7 @@ var Note = {
   },
   share: function (shareCode) {
     let that = this;
-    if(!shareCode.share_key){
+    if (!shareCode.share_key) {
       NoteList.error = "please enter share code."
       return;
     }
@@ -211,9 +232,11 @@ var Note = {
 
 const NoteList = {
   oninit: function () {
-    Note.loadList();
+    Note.loadList(false, this.page);
     NoteList.username = localStorage.getItem('username')
   },
+  lastScrollTop: 0,
+  page: 1,
   username: "",
   editing: null,
   shareView: null,
@@ -290,6 +313,26 @@ const NoteList = {
         [
           m(
             'ul#todo-list',
+            {
+              onscroll: async (e) => {
+                let element = e.target;
+                if (element.scrollTop < this.lastScrollTop) {
+                  // upscroll 
+                  return;
+                }
+                this.lastScrollTop = element.scrollTop <= 0 ? 0 : element.scrollTop;
+                if (element.scrollTop + element.offsetHeight >= element.scrollHeight) {
+                  this.page++;
+                  if (localStorage.getItem('lastPage') == 'false') {
+                    try {
+                      await Note.loadList(true, this.page);
+                    } catch (error) {
+                      this.page--;
+                    }
+                  }
+                }
+              }
+            },
             Note.list.map(function (note, i) {
               return m(
                 'li.note-list-item',
@@ -393,7 +436,7 @@ const NoteList = {
           'button.refresh',
           {
             onclick: function () {
-              Note.loadList(true);
+              Note.loadList(true, 0);
             }
           },
           m('i.ion-refresh', {

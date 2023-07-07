@@ -1,4 +1,4 @@
-export const API_URL = 'https://zotit.twobits.in';
+export const API_URL = 'https://zotit.app/api';
 
 export const DB = new Dexie('NotesDB');
 DB.version(1).stores({
