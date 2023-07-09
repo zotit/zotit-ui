@@ -33,8 +33,6 @@ body {
   line-height: 1.4em;
   background: #f5f5f5;
   color: #4d4d4d;
-  width: 400px;
-  max-height: 500px;
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
   -moz-font-smoothing: antialiased;
@@ -54,8 +52,8 @@ input[type='checkbox'] {
 #todoapp {
   width: 100%;
   background: #fff;
-  margin: 45px 0 40px 0;
-  position: relative;
+  margin: 0px 0 40px 0;
+  position: absolute;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -78,8 +76,6 @@ input[type='checkbox'] {
 }
 
 #todoapp h1 {
-  position: absolute;
-  top: -66px;
   width: 100%;
   font-size: 40px;
   font-weight: 100;
@@ -88,6 +84,9 @@ input[type='checkbox'] {
   -webkit-text-rendering: optimizeLegibility;
   -moz-text-rendering: optimizeLegibility;
   text-rendering: optimizeLegibility;
+  margin: 0;
+  padding: 12px 0 12px 0;
+  background: #f5f5f5;
 }
 #todoapp .welcome-text {
   font-size: 14px;
@@ -117,13 +116,12 @@ input[type='checkbox'] {
   font-smoothing: antialiased;
 }
 #new-todo {
-  width: 98%;
-}
-#new-todo {
   padding: 16px 16px 16px 16px;
   border: none;
-  background: rgba(0, 0, 0, 0.003);
+  background:#fff;
   box-shadow: inset 0 -2px 1px rgba(0, 0, 0, 0.03);
+  width: 97%;
+  margin: 5px;
 }
 
 #main {
@@ -136,7 +134,7 @@ input[type='checkbox'] {
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: 400px;
+  max-height: 330px;
   overflow-y: scroll;
 }
 
@@ -418,9 +416,6 @@ html .clear-btn:active {
 }
 
 @media (max-width: 430px) {
-  #footer {
-    height: 50px;
-  }
 
   #filters {
     bottom: 10px;
@@ -477,4 +472,8 @@ margin-left: 1em;
   to {
     transform: rotate(359deg);
   }
+}
+header{
+  display: inline-block;
+    width: 100%;
 }
