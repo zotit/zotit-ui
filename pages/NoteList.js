@@ -55,29 +55,7 @@ async function getRemoteList(pageNo) {
   return apiResult;
 }
 
-async function getShareCode() {
-  let apiResult = "";
-  NoteList.error = "";
-  try {
-    apiResult = await m.request({
-      method: 'GET',
-      url: API_URL + '/share-key',
-      responseType: "string",
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token')
-      }
-    });
 
-  } catch (error) {
-    if (error.code && error.code == 401) {
-      localStorage.clear();
-      m.route.set('/login');
-    }
-    console.log(error);
-    NoteList.error = 'Failed to load share key';
-  }
-  return apiResult;
-}
 var Note = {
   isLoading: false,
   shareCode: "",
@@ -173,8 +151,8 @@ var Note = {
   },
   share: function (shareCode) {
     let that = this;
-    if (!shareCode.share_key) {
-      NoteList.error = "please enter share code."
+    if (!shareCode.user_name) {
+      NoteList.error = "please enter receiver username"
       return;
     }
     that.isLoading = true;
@@ -250,13 +228,7 @@ const NoteList = {
       e.target.value = '';
     }
   },
-  loadShareCode: async function () {
-    Note.isLoading = true;
-    let shareCode = await getShareCode()
-    Note.shareCode = shareCode;
-    m.redraw()
-    Note.isLoading = false;
-  },
+
   update: function (title) {
     if (NoteList.editing != null) {
       NoteList.editing.text = title.trim();
@@ -369,12 +341,12 @@ const NoteList = {
                     ]),
                     m('input.share-key-input', {
 
-                      placeholder: 'Enter share code.',
-                      maxlength: "6",
-                      value: ui.shareView != null ? ui.shareView.share_key : "",
+                      placeholder: 'Enter receiver Username',
+                      maxlength: "60",
+                      value: ui.shareView != null ? ui.shareView.user_name : "",
                       oninput: function (e) {
                         e.preventDefault();
-                        ui.shareView.share_key = e.currentTarget.value;
+                        ui.shareView.user_name = e.currentTarget.value;
                       },
 
                     }),
@@ -420,19 +392,6 @@ const NoteList = {
         Note.list.length == 0 && !NoteList.error ? 'No notes created yet.' : ''
       ),
       m('footer#footer', [
-        m('span#todo-count', [
-          m('span.share-code', Note.shareCode),
-          m(
-            'button.share-code-btn',
-            {
-              onclick: function () {
-                ui.loadShareCode()
-              }
-            },
-            'Share Code: '
-          ),
-
-        ]),
         m(
           'button.refresh',
           {
