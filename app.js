@@ -1,4 +1,5 @@
 import Login from './pages/Login.js'
+import SignUp from './pages/SignUp.js'
 import NoteList from './pages/NoteList.js'
 
 
@@ -20,6 +21,16 @@ m.route(document.getElementById('todoapp'), "/home", {
         m.route.set("/home")
       }else{
         return Login
+      }
+    }
+  },
+  "/signup": {
+    onmatch: function() {
+      let token = localStorage.getItem("token");
+      if(token!=null){
+        m.route.set("/home")
+      }else{
+        return SignUp
       }
     }
   }

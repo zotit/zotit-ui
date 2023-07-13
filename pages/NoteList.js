@@ -119,7 +119,7 @@ var Note = {
         await DB.notes.add({
           id: result.id,
           text: result.text,
-          created_at: new Date(result.CreatedAt).toISOString()
+          created_at: new Date(result.created_at).toISOString()
         });
         that.isLoading = false;
         that.list.unshift(result);
@@ -130,6 +130,7 @@ var Note = {
           m.route.set('/login');
         }
         that.isLoading = false;
+        console.log(e)
         NoteList.error = 'Failed to create note.';
       });
   },
@@ -152,13 +153,13 @@ var Note = {
         await DB.notes.put({
           id: result.id,
           text: result.text,
-          created_at: new Date(result.CreatedAt).toISOString()
+          created_at: new Date(result.created_at).toISOString()
         });
         that.isLoading = false;
         that.list[i] = {
           id: result.id,
           text: result.text,
-          created_at: new Date(result.CreatedAt).toISOString()
+          created_at: new Date(result.created_at).toISOString()
         }
       })
       .catch(function (e) {

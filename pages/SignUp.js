@@ -9,6 +9,14 @@ const username = {
     error: ''
 }
 
+const email = {
+    label: 'Email Id',
+    placeholder: 'Email address',
+    autofocus: false,
+    type: "email",
+    value: '',
+    error: ''
+}
 const password = {
     label: 'Password',
     placeholder: 'Please enter a strong password',
@@ -19,20 +27,32 @@ const password = {
 }
 
 
-function login() {
+
+function signup() {
     if (!(!username.error && !password.error)) {
         return;
     }
+
+    if (!SignUp.isChecked) {
+        SignUp.apiError = "Please check the box to signup."
+        return;
+    }
+    if (!username.value || !password.value || !email.value) {
+        SignUp.apiError = "All of the above fields are required to signup."
+        return;
+    }
+
     m.request({
         method: 'POST',
-        url: API_URL + '/login',
+        url: API_URL + '/register',
         body: {
             username: username.value,
-            password: password.value
+            password: password.value,
+            email_id: email.value
         }
     })
         .then(function (result) {
-            Login.apiError = false;
+            SignUp.apiError = false;
             if (result.token && result.token != "") {
                 localStorage.setItem("username", username.value)
                 localStorage.setItem("token", result.token)
@@ -40,10 +60,9 @@ function login() {
             }
         })
         .catch(function (e) {
-            Login.apiError = e.toString()
+            SignUp.apiError = e.toString()
         });
 }
-
 const input = (attrs) =>
     m('div',
         m("label", { class: "sr-only" }, attrs.label),
@@ -66,7 +85,7 @@ const validate = () => {
     password.error = password.value.length < 4
         && 'Please enter a password longer than 4 characters'
 }
-const Login = {
+const SignUp = {
     apiError: "",
     isChecked: false,
     view: function () {
@@ -74,33 +93,41 @@ const Login = {
             m('header.header', [
                 m('h1', 'ZotIt'),
             ]),
-            m("h2", { class: "form-signin-heading" }, "Please Sign In"),
-            m("h3", "You can download the app from the Android Play Store as well ",
-                m('a', {"target": "_blank", href: "https://play.google.com/store/apps/details?id=in.twobits.zotit" }, "Android Play Store")
-            ),
+            m("h2", { class: "form-signin-heading" }, "Please Sign Up"),
+            m("p", { class: "form-signin-heading-p" }, "We don't store any personal information other than your email id"),
+            m("p", { class: "form-signin-heading-p" }, "P.S. Without a valid email-id we cannot recover password in case of forgotten."),
             m('br'),
 
+            input(email),
             input(username),
             input(password),
-
-            Login.apiError && m('p.error', Login.apiError),
+            m('div.check', [
+                m('input', {
+                    type: "checkbox", onchange: function () {
+                        SignUp.isChecked = !SignUp.isChecked
+                    }
+                },),
+                m("label", { class: "sr-only" }, ["Please check this box to accept out ",
+                    m('a', {
+                        href: "http://zotit.twobits.in/privacy-policy.html"
+                    }, "Privacy Policy"),
+                ]),
+            ]),
+            SignUp.apiError && m('p.error', SignUp.apiError),
             m("button.btn.fr.btn-red.btn-full.mb-1", {
                 type: "button", onclick: function () {
-                    login();
-
+                    signup();
                 }
-            }, "Sign in"),
+            }, "Sign Up"),
             m("button.btn.btn-full.mb-1", {
                 type: "button", onclick: function () {
-                    m.route.set('/signup')
+                    m.route.set('/login')
+
                 }
-            }, "Go to Sign Up Page"),
-            m("p", { class: "form-signin-heading-p" }, "In case of forgot password please go to ",
-                m('a', { href: "https://web.zotit.app", "target": "_blank" }, "https://web.zotit.app")
-            ),
+            }, "Go to login page"),
 
         ]);
     }
 }
 
-export default Login
+export default SignUp
